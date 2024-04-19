@@ -2,145 +2,192 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct Product{
+struct Product {
     char name[51];
     int units_in_stock;
     double price;
-    union{
-        struct{
-            int dimensions[3] = {0.0, 0.0, 0.0};
+    union {
+        struct {
+            int dimensions[3];
         };
-        struct{
+        struct {
             char description[101];
-        }
-    }details;
+        };
+    } details;
+    int dim_or_desc;
     struct Product *next;
 };
 
-void add_product(struct Prodcut *ptr){
-    while (ptr->next != NULL){
-        ptr = ptr->next;
+void add_product(struct Product **ptr) {
+    if (*ptr == NULL) {
+        *ptr = (struct Product *)malloc(sizeof(struct Product));
+        (*ptr)->next = NULL;
+    } else {
+        struct Product *current = *ptr;
+        while (current->next != NULL) {
+            current = current->next;
+        }
+        current->next = (struct Product *)malloc(sizeof(struct Product));
+        current->next->next = NULL;
     }
-    int dim_or_desc;
-    ptr->next = (struct Product *) malloc(sizeof(struct Product));
+
+    struct Product *new_product = *ptr;
+    while (new_product->next != NULL) {
+        new_product = new_product->next;
+    }
 
     printf("Enter Product Name: ");
-    fgets(ptr->name);
-    
-    printf("Enter Quantity: ");
-    scanf("%d", &ptr->units_in_stock);
-    
-    printf("Enter Price: ");
-    scanf("%lf", &ptr->price);
+    fgets(new_product->name, sizeof(new_product->name), stdin);
+    strtok(new_product->name, "\n");
 
-    do{
-        printf("Does this product have dimensisons (1 for YES or 0 for NO): ");
-        scanf("%i", &dim_or_desc);
-    }while(dim_or_desc != 0 or dim_or_desc != 1);
-    
-    if (dim_dim_or_desc == 1){
-        do{
-            printf("Enter length, width, and height: ");
-            scanf("%d %d %d", &ptr->details.dimensions[0],  &ptr->details.dimensions[1],  &ptr->details.dimensions[2]);
-        }while(ptr->details.dimensions[0] == 0 & ptr->details.dimensions[1] == 0 & ptr->details.dimensions[2] == 0)
-    }else{
+    printf("Enter Quantity: ");
+    scanf("%d", &new_product->units_in_stock);
+    getchar();
+
+    printf("Enter Price: ");
+    scanf("%lf", &new_product->price);
+    getchar();
+
+    printf("Does this product have dimensions? (1 for YES or 0 for NO): ");
+    scanf("%d", &new_product->dim_or_desc);
+    getchar();
+    if ( new_product->dim_or_desc == 1) {
+        printf("Enter length, width, and height: ");
+        scanf("%d %d %d", &new_product->details.dimensions[0], &new_product->details.dimensions[1], &new_product->details.dimensions[2]);
+        getchar();
+    } else {
         printf("Enter Product description: ");
-        fgets(ptr->details.description, sizeof(ptr->details.description), stdin);
+        fgets(new_product->details.description, sizeof(new_product->details.description), stdin);
+        strtok(new_product->details.description, "\n");
     }
 
-    printf("Product Added Successfully!");
+    printf("Product Added Successfully!\n");
 }
 
-void display_products(struct Prodcut *ptr){
+void display_products(struct Product *ptr) {
     printf("Name\t\tQuantity\tPrice\tDetails\n");
 
-    while (ptr != NULL){
-        if (ptr->details.description[0] != "/0"){
-            printf("%s\t\t%d\t%.2lf\t%s", ptr->name, ptr->units_in_stock, ptr->price,ptr->details.description);
-        }else if (ptr->details.dimensions[0] != 0 || ptr->details.dimensions[1] != 0 || ptr->details.dimensions[2] != 0 ||){
-            printf("%s\t\t%d\t%.2lf\t%dx%dx%d", ptr->name, ptr->units_in_stock, ptr->price, ptr->details.dimensions[0],  ptr->details.dimensions[1],  ptr->details.dimensions[2]);
-        }else{
-            printf("%s\t\t%d\t%.2lf", ptr->name, ptr->units_in_stock, ptr->price);
+    while (ptr != NULL) {
+        if (ptr->dim_or_desc == 0) {
+            printf("%s\t\t%d\t\t%.2lf\t%s\n", ptr->name, ptr->units_in_stock, ptr->price, ptr->details.description);
+        }
+        else if (ptr->dim_or_desc == 1) {
+            printf("%s\t\t%d\t\t%.2lf\t%d x %d x %d\n", ptr->name, ptr->units_in_stock, ptr->price,
+                   ptr->details.dimensions[0], ptr->details.dimensions[1], ptr->details.dimensions[2]);
+        } else {
+            printf("%s\t\t%d\t\t%.2lf\n", ptr->name, ptr->units_in_stock, ptr->price);
         }
         ptr = ptr->next;
     }
 }
 
-void update_product_quantity(struct Prodcut *ptr){
+void update_product_quantity(struct Product *ptr) {
     char productToUpdate[50];
     int quantityToUpdate;
-    
-    printf("Enter product name to update price: ");
+
+    printf("Enter product name to update quantity: ");
     fgets(productToUpdate, sizeof(productToUpdate), stdin);
+    strtok(productToUpdate, "\n");
 
     printf("Enter new quantity: ");
     scanf("%d", &quantityToUpdate);
+    getchar();
 
-    while (strcmp(ptr->name, productToUpdate) != 0){
+    while (ptr != NULL && strcmp(ptr->name, productToUpdate) != 0) {
         ptr = ptr->next;
     }
-    if (ptr == NULL){
-        printf("Product with name %s not found!", productToUpdate)
-    }else if ((strcmp(ptr->name, productToUpdate) == 0)){
+    if (ptr == NULL) {
+        printf("Product with name %s not found!\n", productToUpdate);
+    } else {
         ptr->units_in_stock = quantityToUpdate;
-        printf("Product quantity updated Successfully!");
+        printf("Product quantity updated Successfully!\n");
     }
 }
 
-void update_product_price(struct Prodcut *ptr){
+void update_product_price(struct Product *ptr) {
     char productToUpdate[50];
-    int priceToUpdate;
-    
+    double priceToUpdate;
+
     printf("Enter product name to update price: ");
     fgets(productToUpdate, sizeof(productToUpdate), stdin);
+    strtok(productToUpdate, "\n");
 
     printf("Enter new price: ");
-    scanf("%d", &priceToUpdate);
+    scanf("%lf", &priceToUpdate);
+    getchar();
 
-    while (strcmp(ptr->name, productToUpdate) != 0){
+    while (ptr != NULL && strcmp(ptr->name, productToUpdate) != 0) {
         ptr = ptr->next;
     }
-    if (ptr == NULL){
-        printf("Product with name %s not found!", productToUpdate)
-    }else if ((strcmp(ptr->name, productToUpdate) == 0)){
-        ptr->price= priceToUpdate;
-        printf("Product price updated Successfully!");
+    if (ptr == NULL) {
+        printf("Product with name %s not found!\n", productToUpdate);
+    } else {
+        ptr->price = priceToUpdate;
+        printf("Product price updated Successfully!\n");
     }
 }
 
-void delete_product(struct Prodcut *ptr){
+void delete_product(struct Product **ptr) {
     char productToDelete[50];
     
     printf("Enter product name to delete: ");
-    fgets(productToUpdate, sizeof(productToDelete), stdin);
+    fgets(productToDelete, sizeof(productToDelete), stdin);
+    strtok(productToDelete, "\n");
+
+    while (*ptr != NULL && strcmp((*ptr)->name, productToDelete) != 0) {
+        ptr = &((*ptr)->next);
+    }
+    if (*ptr == NULL) {
+        printf("Product with name %s not found!\n", productToDelete);
+    } else {
+        struct Product *temp = *ptr;
+        *ptr = (*ptr)->next;
+        free(temp);
+        printf("Product deleted Successfully!\n");
+    }
 }
 
-
-
-int main(){
+int main() {
     int choice;
-    struct Product product;
-    product->next = NULL;
-    
-    do{
-        choice = -1;
-        do{
-            printf("Inventory Management System\n");
-            printf("1. Add Product\n2. Display Products\n3. Update Product Quantity\n4. Update Product Price\n5. Delete Product\n6. Exit\n");
-            printf("Enter your choice: \n");
-            scanf("%d", &choice);
-        }while(choice != 1 || choice != 2 || choice != 3 || choice != 4 || choice != 5 || choice != 6);
+    struct Product *product = NULL;
 
-        switch (choice)
-        {
-        case 1: add_product(&product); break;
-        case 2: display_products(&product); break;
-        case 3: update_product_qunatity(&product); break;
-        case 4: update_product_price(&product); break;
-        case 5: delete_product(&product); break;
-        default: break;
+    do {
+        printf("\nInventory Management System\n");
+        printf("1. Add Product\n2. Display Products\n3. Update Product Quantity\n4. Update Product Price\n5. Delete Product\n6. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        getchar();
+
+        switch (choice) {
+            case 1:
+                add_product(&product);
+                break;
+            case 2:
+                display_products(product);
+                break;
+            case 3:
+                update_product_quantity(product);
+                break;
+            case 4:
+                update_product_price(product);
+                break;
+            case 5:
+                delete_product(&product);
+                break;
+            case 6:
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid choice! Please enter a number between 1 and 6.\n");
+                break;
         }
-    } while(choice != 6);
+    } while (choice != 6);
+
+    while (product != NULL) {
+        struct Product *temp = product;
+        product = product->next;
+        free(temp);
+    }
 
     return 0;
 }
