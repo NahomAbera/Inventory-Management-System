@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*
+    The struct Product is designed to store basic product attributes such as name, units in stock, and price. 
+    It has a union to either physical dimensions or a textual description.
+    It also includes a pointer to support the creation of linked lists of products.
+*/
 struct Product {
     char name[51];
     int units_in_stock;
@@ -18,6 +23,12 @@ struct Product {
     struct Product *next;
 };
 
+/*
+    This function dynamically adds a new product to the end of a linked list of struct Product.
+    It checks if the list is empty and initializes it if so, otherwise it traverses to the end of the list to create a new node to store the product data.
+    The function then prompts the user to input the product’s name, quantity, price, and either its dimensions or a textual description based on the user’s choice. 
+    Then this data is stored in the newly created product node.
+*/
 void add_product(struct Product **ptr) {
     if (*ptr == NULL) {
         *ptr = (struct Product *)malloc(sizeof(struct Product));
@@ -64,6 +75,12 @@ void add_product(struct Product **ptr) {
     printf("Product Added Successfully!\n");
 }
 
+/*
+    The display_products function iteratively traverses a linked list of struct Product and prints out detailed information for each product. 
+    It displays product names, quantities, prices, and either descriptions or dimensions based on what's relevant. 
+    The output is formatted into a table-like structure..
+*/
+
 void display_products(struct Product *ptr) {
     printf("Name\t\tQuantity\tPrice\tDetails\n");
 
@@ -81,6 +98,11 @@ void display_products(struct Product *ptr) {
     }
 }
 
+/*
+- This function prompts the user to enter the name of a product and a new quantity, then searches through a linked list of struct Product 
+  to find and update the quantity of the specified product. 
+- If the product is found, its quantity is updated; if not, a message indicating the product was not found is displayed. 
+*/
 void update_product_quantity(struct Product *ptr) {
     char productToUpdate[50];
     int quantityToUpdate;
@@ -104,6 +126,11 @@ void update_product_quantity(struct Product *ptr) {
     }
 }
 
+/*
+- This function prompts the user to enter the name of a product and a new price, then searches through a linked list of struct Product 
+  to find and update the price of the specified product. 
+- If the product is found, its price is updated; if not, a message indicating the product was not found is displayed. 
+*/
 void update_product_price(struct Product *ptr) {
     char productToUpdate[50];
     double priceToUpdate;
@@ -127,6 +154,12 @@ void update_product_price(struct Product *ptr) {
     }
 }
 
+/*
+    The delete_product function prompts the user for the name of a product to delete from a linked list of struct Product. 
+    It navigates through the list to locate the specified product. 
+    If found, the product is removed from the linked list by adjusting the pointers accordingly and freeing the allocated memory for that product node. 
+    If the product is not found, a message is displayed indicating it the product is not first of all stored in the program. 
+*/
 void delete_product(struct Product **ptr) {
     char productToDelete[50];
     
@@ -149,7 +182,7 @@ void delete_product(struct Product **ptr) {
 
 int main() {
     int choice;
-    struct Product *product = NULL;
+    struct Product *product = NULL; //Declare a pointer and initialize it with zero.
 
     do {
         printf("\nInventory Management System\n");
@@ -172,17 +205,18 @@ int main() {
                 update_product_price(product);
                 break;
             case 5:
-                delete_product(&product);
+                delete_product(&product); 
                 break;
             case 6:
-                printf("Exiting...\n");
+                printf("Good Bye!\n"); // Leave the program if the user chooses 6.
                 break;
             default:
                 printf("Invalid choice! Please enter a number between 1 and 6.\n");
                 break;
         }
-    } while (choice != 6);
+    } while (choice != 6); 
 
+    //Free all dynamically allocated memory associated with the product list to prevent memory leaks. 
     while (product != NULL) {
         struct Product *temp = product;
         product = product->next;
